@@ -1,6 +1,7 @@
 // ONLY USE FOR MEGA 2560
 
-#include <SoftwareSerial.h>
+#include <SoftwareSerial.h>\
+#include <SPI.h>
 #include <SD.h>
 #include <LiquidCrystal.h>
 #include <a3gs2.h>
@@ -220,7 +221,7 @@ void pict() {
       uint8_t bytesToRead = min(32, jpglen);
       buffer = cam.readPicture(bytesToRead);
       imgFile.write(buffer, bytesToRead);
-      if(++wCount >= 96) {
+      if(++wCount >= 26) {
         lcd.write(0xFF);
         wCount = 0;
       }
@@ -244,18 +245,18 @@ void pict() {
       delay(2000);
     } else {
       // Send POST request
-      lcd.setCursor(0,1); lcd.print("HTTP POST [OK]");
+      lcd.setCursor(0,1); lcd.print("HTTP POST [OK]  ");
       delay(2000);
       // ->HEAD<-
-      a3gs.write("POST /api/a3gs/upload.php HTTP/1.0$n");
+      a3gs.write("POST /api/original/upload.php HTTP/1.1$n");
       a3gs.write("HOST: "); a3gs.write(server); a3gs.write("$n");
-      a3gs.write("Content-Type: text/plain");
+      a3gs.write("Content-Type: text/plain$n");
       a3gs.write("Content-Length: "); a3gs.write("20000"); a3gs.write("$n$n");
       // ->BODY<-
       a3gs.write("[ACCESSKEY]"); a3gs.write(ACCESSKEY);
       a3gs.write("[DATE]"); a3gs.write(date);
       a3gs.write("[TIME]"); a3gs.write(time);
-      a3gs.write("[TIMEZONE]9[TAG]testdata");
+      a3gs.write("[TIMEZONE]9[TAG]#testdata");
       a3gs.write("[LOCATION]"); a3gs.write(lon); a3gs.write(" "); a3gs.write(lat);
       a3gs.write("[MIMETYPE]image/jpeg[CONTENT]");
 
@@ -305,18 +306,18 @@ void pict() {
     bitWrite(bin[3],0,bitRead(buf[2],0));
     a3gs.write(b64table[bin[0]]); a3gs.write(b64table[bin[1]]); a3gs.write(b64table[bin[2]]); a3gs.write(b64table[bin[3]]);
     curr++;
+    blinker = !blinker; a3gs.setLED(blinker);
     if (curr >= 100) {
       curb = curb + 300;
       curr = 0;
-      a3gs.setLED(blinker);
       float percentage = (float)curb / estfsize;
       lcd.clear();
+      lcd.setCursor(0,0); lcd.print("Uploading...");
+      lcd.setCursor(0,1);
       lcd.print(percentage*100);
       lcd.print("% / ");
       lcd.print(curb);
       lcd.print("B");
-      lcd.setCursor(0,1); lcd.print("Uploading...");
-      blinker = !blinker;
     }
   }//while (fpos < minfile)
 
@@ -425,6 +426,8 @@ void setup() {
   if (cam.begin()) {
     lcd.print("Camera OK.");
     camAVL = true;
+    cam.getVersion();
+    delay(10);
     cam.setImageSize(VC0706_320x240);
   } else {
     lcd.print("No camera found!");
