@@ -1,0 +1,55 @@
+
+・WebインターフェースとなるphpファイルがMySQLにアクセスするときのユーザーは”toadrockie”
+　GRANTは全データベース一覧の表示とSyBとSyUSERの二つのDBへのフルアクセス
+・/upload以下にあるデータアップロード用phpからMySQLにはdataテーブルへのINSERTのみ許可される別のユーザーを作成する.
+
+
+・SyUser/~ (ユーザテーブル)は全てMyISAM,それ以外(system_が接頭するもの)はInnoDB.
+　Geometry型とIndexにSPATIALキーを利用するため.
+・php側で処理するものとデータベース側で処理するものをうまく区別する.
+　■php処理…ファイルサイズ等
+　■MySQL処理…位置情報関係(Geometry)
+
+
+・ユーザーパスワードは単にsha256でハッシュしたものをDB内部に保存し、ログイン時に照合しているだけ。
+・accesskeyは以下の文字列をsha1でハッシュした16進数字列:
+　accesskey = hash('sha1’, [username].[devicename].[openssl_random_pseudo_bytes(rand(2,10))] );
+・device_imgfilenameはhash(‘md5’, [devicename]+[username]).jpg
+
+
+・Content内に保存されるファイルは、日付ごとにサブフォルダ化される。
+　ファイル名は以下の通り
+　[デバイスID]-[時分秒]-[ユーザー名]_[10進数3桁のランダム値].xxx
+　拡張子はアップロード時のMIMETYPEをデータベースから探し適切なものをセット、存在しない場合や指定されていない場合は拡張子無しのファイルとなる。
+　Contentが存在しない場合は、データベース内のcontent_filenameにNO_CONTENTSが設定される。
+
+
+・locationフィールドのGeometry型による位置情報はNULL不可、よって位置が特定できないデバイスとデータ(移動体もしくは人によるWeb手入力)は
+　location_unavailable=1(dataテーブル)もしくはis_fixed=0(deviceテーブル)となっている。
+　地理的近傍位置検索等を利用するときは、これらのレコードの値は不定であるので、
+　上記のとおりlocation_unavailable=1またはis_fixed=0となるレコードは除外する。
+
+
+・被送信データにおける位置情報の記録優先順位
+　■データのlocation_unavailable=1のとき　→　送信データ内の位置情報あるなしに関わらず、locationはデフォルト値に設定（位置情報利用不可）
+　 データで上記が0もしくはnullのとき　→　デフォルトとしてunavailable=0を書き込む
+　  - さらにlocation情報がある　→　そのまま採用
+　  - ない　→　下へ
+　■deviceのis_fixed=1のとき　→　location情報をそのままコピーして採用
+　 is_fixed=0（デフォルト値でない）のとき　→　deviceのlocationは設定されているがdataにはデフォルト値を設定する（位置情報利用不可）
+
+
+・デバイスから利用できるメソッド
+ *- UPLOAD : 各種データをアップロードするのに使う
+ *- REPORT : 動作状態などをログとしてサーバーに書き込む
+ *- FETCH  : サーバー上の設定用文字列などを読み込む
+　上位ディレクトリは"original"が独自形式によるAPI、"stdpost"がRFC準拠のHTTP-POSTによるAPIとする。
+
+
+・センサーページでは最新の5件のみ表示する。
+　さらに詳しいデータが必要な場合は、「最新のn件」や「n時間〜nヶ月前」などの検索条件をかけたうえで
+　「ブラウザ上で表形式で表示」「csvダウンロード」「jsonダウンロード」「kmlダウンロード(移動体向け)」などの提供方法を用意する。
+
+
+
+

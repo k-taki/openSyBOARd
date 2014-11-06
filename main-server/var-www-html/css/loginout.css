@@ -1,0 +1,67 @@
+@import url(http://fonts.googleapis.com/css?family=Voltaire);
+
+
+/* Login */
+form#loginForm	{
+		margin:30px auto 0px;
+		padding:30px;
+		width:600px;
+		height:330px;
+		/* box-shadow:0px 0px 20px #6666CC,0px 0px 10px #ffffff inset; */
+		background-color:rgba(110,210,80,0.5);
+		border-radius:10px 10px 10px 10px;
+		}
+fieldset#loginField	{
+		position:relative;
+		margin:10px auto;
+		width:400px;
+		height:150px;
+		text-align:right;
+		}
+/* Logout */
+div#logout	{
+		margin:30px auto 0px;
+		padding:30px;
+		width:600px;
+		height:330px;
+		/* box-shadow:0px 0px 20px #6666CC,0px 0px 10px #ffffff inset; */
+		background-color:rgba(110,210,80,0.5);
+		border-radius:10px 10px 10px 10px;
+		}
+
+
+
+
+
+
+
+
+/* caption */
+h1		{
+		color:#010101;
+		font-size:40px;
+		font-family:'Voltaire',sans-serif;
+		width:500px;
+		margin:0px auto;
+		text-align:left;
+		}
+h2		{
+		color:#010101;
+		font-size:16px;
+		font-family:'Voltaire',sans-serif;
+		width:500px;
+		margin:0px auto;
+		text-align:right;
+		}
+p		{
+		color:#010101;
+		font-size:12px;
+		font-family:sans-serif;
+		width:500px;
+		margin:15px auto;
+		text-align:center;
+		}
+
+
+
+/*EOF*/

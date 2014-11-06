@@ -1,0 +1,220 @@
+@import url(http://fonts.googleapis.com/css?family=Voltaire);
+
+
+/* Base */
+body	{
+		margin:0;
+		font-size:16px;
+		line-height:1.6;
+		letter-spacing:1.2px;
+		font-family:"Times New Roman",sans-serif;
+		color:#101010;
+		overflow:auto;
+		text-align:center;
+		background-color:#F0F0F0;
+		}
+div#container {
+		width:1000px;
+		height:100%;
+		min-height:600px;
+		margin:0px auto 0px;
+		overflow:hidden;
+		}
+a		{
+		color:#901010;
+		text-decoration:underline;
+		}
+a:hover {
+		color:#606060;
+		text-decoration:underline;
+		}
+
+
+
+
+
+
+
+
+
+/* Mainblocks */
+article#notice {
+		float:right;
+		margin:10px 20px 20px;
+		margin-left:10px;
+		padding:10px;
+		padding-bottom:40px;
+		width:620px;
+		box-shadow:0px 0px 5px #5462C9,0px 0px 5px #ffffff inset;
+		background-color:rgba(90,140,255,0.5);
+		border-radius:10px 10px 10px 10px;
+		}
+/* Device description */
+article#notice h2 {
+		float:left;
+		margin:0px 20px;
+		height:45px;
+		width:550px;
+		font-size:30px;
+		font-family:'Voltaire',sans-serif;
+		text-align:left;
+		}
+article#notice p {
+		float:left;
+		margin:0px 30px;
+		padding:5px 10px;
+		width:540px;
+		height:90px;
+		font-size:14px;
+		font-family:sans-serif;
+		text-align:left;
+		background-color: rgba(255,255,255,0.2);
+		border-radius:10px 10px 10px 10px;
+		}
+
+
+
+
+
+
+
+
+
+/* border-section */
+section.bb	{
+		float:right;
+		text-align:center;
+		font-family:sans-serif;
+		font-size:12px;
+		margin:0px 20px;
+		margin-left:10px;
+		padding:10px;
+		width:620px;
+		height:20px;
+		background-color:transparent;
+		}
+
+
+
+
+
+
+
+
+
+
+/* Devices list */
+article {
+		float:right;
+		margin:10px 20px 0px;
+		margin-left:10px;
+		padding:10px;
+		width:620px;
+		height:120px;
+		box-shadow:0px 0px 5px #CC9999,0px 0px 5px #ffffff inset;
+		background-color:rgba(220,150,150,0.5);
+		border-radius:3px 70px 70px 3px;
+		}
+/* Device image */
+article img {
+		float:left;
+		margin:0px 20px;
+		width:160px;
+		height:120px;
+		box-shadow:0px 0px 6px #050505;
+		}
+/* Device description */
+article h4 {
+		float:left;
+		overflow:hidden;
+		margin:0px;
+		height:50px;
+		width:400px;
+		color:#101010;
+		font-size:30px;
+		font-family:'Voltaire',sans-serif;
+		text-align:left;
+		}
+article h4 a {
+		color:#101010;
+		text-decoration:none;
+		}
+article h4 a:hover {
+		color:#606060;
+		text-decoration:none;
+		}
+article p {
+		float:left;
+		overflow:hidden;
+		margin:0px 10px;
+		margin-right:0px;
+		height:60px;
+		width:370px;
+		font-size:12px;
+		font-family:sans-serif;
+		text-align:left;
+		overflow:auto;
+		}
+/* Device-coloring */
+article.device_normal {
+		box-shadow:0px 0px 5px #C9C0AF,0px 0px 5px #ffffff inset;
+		background-color:rgba(250,190,130,0.5);
+		}
+article.device_user {
+		box-shadow:0px 0px 5px #B5C7CC,0px 0px 5px #ffffff inset;
+		background-color:rgba(190,230,240,0.5);
+		}
+article.device_hidden {
+		box-shadow:0px 0px 5px #CAB5CC,0px 0px 5px #ffffff inset;
+		background-color:rgba(230,160,240,0.5);
+		}
+
+
+
+
+
+
+
+
+/* Sidebar */
+aside{
+		float:left;
+		margin:10px 20px 0px;
+		margin-right:10px;
+		padding:10px;
+		width:280px;
+		height:500px;
+		box-shadow:0px 0px 5px #66CC66,0px 0px 5px #ffffff inset;
+		background-color:rgba(100,200,100,0.5);
+		border-radius:10px 10px 10px 10px;
+		}
+
+
+
+
+
+
+
+
+/* caption */
+h1		{
+		color:#010101;
+		font-size:40px;
+		font-family:'Voltaire',sans-serif;
+		width:500px;
+		margin:0px auto;
+		text-align:left;
+		}
+p		{
+		color:#010101;
+		font-size:12px;
+		font-family:sans-serif;
+		width:500px;
+		margin:0px auto;
+		text-align:center;
+		}
+
+
+
+
+/*EOF*/

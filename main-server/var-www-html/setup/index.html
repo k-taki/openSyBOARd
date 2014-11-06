@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="Shift_JIS">
+	<title>LiveCamduino3G! - Setup page</title>
+</head>
+<body>
+	<form action="setcmd.php" method="post">
+		<p>Please set interval time when Camduino3G takes picture.<br>
+	<select name="cmd">
+		<option value="Z">Z: Motion Detectable</option>
+		<option value="A">A: Zero Interval</option>
+		<option value="B">B: 30minutes</option>
+		<option value="C">C: 1hour</option>
+		<option value="D">D: 2hours</option>
+		<option value="E">E: 3hours</option>
+		<option value="F">F: 6hour</option>
+		<option value="G">G: 12hours</option>
+		<option value="H">H: 24hours</option>
+	</select>
+		<input type="submit" value="SET">
+	</p></form>
+
+
+	<form action="setcmd.php" method="post">
+		<p>Please set interval time when Camduino3G takes picture.<br>
+	<select name="cmd">
+		<option value="A">A: 640x480</option>
+		<option value="B">B: 320x240</option>
+		<option value="C">C: 160x120</option>
+	</select>
+		<input type="submit" value="SET">
+	</p></form>
+
+
+	Current status:
+	<iframe src="cmd.s" name="cmdstat" scrolling="no" frameborder="0" width="60px" marginwidth="0" height="15px" marginheight="0" noresize></iframe><br>
+	<a href="../">Back to home</a>
+</body>
+</html>
