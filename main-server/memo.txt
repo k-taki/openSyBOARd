@@ -1,10 +1,10 @@
 
 ・WebインターフェースとなるphpファイルがMySQLにアクセスするときのユーザーは”toadrockie”
-　GRANTは全データベース一覧の表示とSyBとSyUSERの二つのDBへのフルアクセス
+　GRANTは全データベース一覧の表示とSyMainへのフルアクセス
 ・/upload以下にあるデータアップロード用phpからMySQLにはdataテーブルへのINSERTのみ許可される別のユーザーを作成する.
 
 
-・SyUser/~ (ユーザテーブル)は全てMyISAM,それ以外(system_が接頭するもの)はInnoDB.
+・データとユーザテーブルは全てMyISAM,それ以外(system_が接頭するもの)はInnoDB.
 　Geometry型とIndexにSPATIALキーを利用するため.
 ・php側で処理するものとデータベース側で処理するものをうまく区別する.
 　■php処理…ファイルサイズ等
@@ -43,7 +43,7 @@
  *- UPLOAD : 各種データをアップロードするのに使う
  *- REPORT : 動作状態などをログとしてサーバーに書き込む
  *- FETCH  : サーバー上の設定用文字列などを読み込む
-　上位ディレクトリは"original"が独自形式によるAPI、"stdpost"がRFC準拠のHTTP-POSTによるAPIとする。
+　上位ディレクトリは"original"が独自形式によるAPI、"std"がRFC準拠のHTTP-POSTによるAPIとする。
 
 
 ・センサーページでは最新の5件のみ表示する。

@@ -104,10 +104,10 @@
 		$contentf = date('Y-m-d')."/".$esc_DEVID."-".date('His')."-".$userq_field[0]."_".rand(100,999).".".$mtq_field[0]; // <- extension here!
 		// save file
 		if (move_uploaded_file($_FILES["CONTENT"]["tmp_name"], "../../contents/".$contentf)) {
-    		chmod("../../contents/".$contentf, 0774);
+    		chmod("../../contents/".$contentf, 0655);
     	}
 		//$fbuf = base64_decode($_POST["CONTENT"]);
-		file_put_contents("../../contents/".$contentf, $fbuf);
+		//file_put_contents("../../contents/".$contentf, $fbuf);
 		
 		
 	} else {
