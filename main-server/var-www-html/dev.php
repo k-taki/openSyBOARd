@@ -152,7 +152,7 @@
 		<h2>Latest Data</h2>
 		<table id="data">
 			<!-- Data field name -->
-			<tr><th>TIMESTAMP</th><th>LOCATION</th><th>PLACE</th><th>CONTENT</th><th>DATA STRING</th><th>TAGS</th></tr>
+			<tr><th>LOCALTIME</th><th>LOCATION</th><th>PLACE</th><th>CONTENT</th><th>DATA STRING</th><th>TAGS</th></tr>
 			<!-- Data body -->
 <?php
 			for ($i=1; $i<=$datrow_cnt; $i++) {
@@ -162,7 +162,7 @@
 				// table row
 				echo "<tr>";
 					// timestamp
-					echo "<td>".$datq_field[4]."</td>";
+					echo "<td>".$datq_field[2]." ".$datq_field[3]."</td>";
 					// location
 					echo "<td>";
 					if ($datq_field[7] == 1) {

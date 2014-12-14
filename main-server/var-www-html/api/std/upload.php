@@ -117,14 +117,19 @@
 	}
 
 
+	// Local date-time
+	if (!isset($_POST['TIMEZONE'])) { $_POST['TIMEZONE'] = $devq_field[4]; }
+	$fixhours = (string) $_POST['TIMEZONE'];
+	$fixhours = $fixhours." hour";
+	if (!isset($_POST['DATE'])) { $_POST['DATE'] = 'NULL'; };
+	$_POST['DATE'] = date('Y-m-d' , strtotime($fixhours));
+	if (!isset($_POST['TIME'])) { $_POST['TIME'] = 'NULL'; };
+	$_POST['TIME'] = date('H:i:s' , strtotime($fixhours));
+
 
 	// Escape vars
-	if (!isset($_POST['DATE'])) { $_POST['DATE'] = 'NULL'; }
 	$esc_DATE = $_POST['DATE']; 
-	if (!isset($_POST['TIME'])) { $_POST['TIME'] = 'NULL'; }
 	$esc_TIME = $_POST['TIME'];
-	if (!isset($devq_field[4])) { $devq_field[4] = 'NULL'; } //timezone
-	if (!isset($_POST['TIMEZONE'])) { $_POST['TIMEZONE'] = $devq_field[4]; }
 	$esc_TZON = $_POST['TIMEZONE'];
 	$esc_LOCA = $_POST['LOCATION'];      //processed
 	$esc_LUNA = $_POST['LOCATION_UNAV']; //processed
