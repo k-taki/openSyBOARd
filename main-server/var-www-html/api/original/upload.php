@@ -113,13 +113,17 @@
 	}
 
 
-	// Escape vars
-	if (!isset($mydata['DATE'])) { $mydata['DATE'] = 'NULL'; }
-	$esc_DATE = $mydata['DATE']; 
-	if (!isset($mydata['TIME'])) { $mydata['TIME'] = 'NULL'; }
-	$esc_TIME = $mydata['TIME'];
-	if (!isset($devq_field[4])) { $devq_field[4] = 'NULL'; } //timezone
+	// Local date-time
 	if (!isset($mydata['TIMEZONE'])) { $mydata['TIMEZONE'] = $devq_field[4]; }
+	$fixhours = (string) $mydata['TIMEZONE'];
+	$fixhours = $fixhours." hour";
+	if (!isset($mydata['DATE'])) { $mydata['DATE'] = date('Y-m-d' , strtotime($fixhours)); };
+	if (!isset($mydata['TIME'])) { $mydata['TIME'] = date('H:i:s' , strtotime($fixhours)); };
+
+
+	// Escape vars
+	$esc_DATE = $mydata['DATE']; 
+	$esc_TIME = $mydata['TIME'];
 	$esc_TZON = $mydata['TIMEZONE'];
 	$esc_LOCA = $mydata['LOCATION'];      //processed
 	$esc_LUNA = $mydata['LOCATION_UNAV']; //processed

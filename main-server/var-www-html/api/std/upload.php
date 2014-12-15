@@ -121,10 +121,8 @@
 	if (!isset($_POST['TIMEZONE'])) { $_POST['TIMEZONE'] = $devq_field[4]; }
 	$fixhours = (string) $_POST['TIMEZONE'];
 	$fixhours = $fixhours." hour";
-	if (!isset($_POST['DATE'])) { $_POST['DATE'] = 'NULL'; };
-	$_POST['DATE'] = date('Y-m-d' , strtotime($fixhours));
-	if (!isset($_POST['TIME'])) { $_POST['TIME'] = 'NULL'; };
-	$_POST['TIME'] = date('H:i:s' , strtotime($fixhours));
+	if (!isset($_POST['DATE'])) { $_POST['DATE'] = date('Y-m-d' , strtotime($fixhours)); };
+	if (!isset($_POST['TIME'])) { $_POST['TIME'] = date('H:i:s' , strtotime($fixhours)); };
 
 
 	// Escape vars
