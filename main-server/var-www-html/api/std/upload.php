@@ -126,7 +126,13 @@
 
 
 	// Escape vars
+<<<<<<< Updated upstream
 	$esc_DATE = $_POST['DATE']; 
+=======
+	if (!isset($_POST['DATE'])) { $_POST['DATE'] = 'NULL'; }
+	$esc_DATE = $_POST['DATE'];
+	if (!isset($_POST['TIME'])) { $_POST['TIME'] = 'NULL'; }
+>>>>>>> Stashed changes
 	$esc_TIME = $_POST['TIME'];
 	$esc_TZON = $_POST['TIMEZONE'];
 	$esc_LOCA = $_POST['LOCATION'];      //processed
