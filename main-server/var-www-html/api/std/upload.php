@@ -126,26 +126,22 @@
 
 
 	// Escape vars
-<<<<<<< Updated upstream
 	$esc_DATE = $_POST['DATE']; 
-=======
-	if (!isset($_POST['DATE'])) { $_POST['DATE'] = 'NULL'; }
-	$esc_DATE = $_POST['DATE'];
-	if (!isset($_POST['TIME'])) { $_POST['TIME'] = 'NULL'; }
->>>>>>> Stashed changes
 	$esc_TIME = $_POST['TIME'];
 	$esc_TZON = $_POST['TIMEZONE'];
-	$esc_LOCA = $_POST['LOCATION'];      //processed
-	$esc_LUNA = $_POST['LOCATION_UNAV']; //processed
-	if (!isset($devq_field[7])) { $devq_field[7] = 'NULL'; } //altitude
-	if (!isset($_POST['ALTITUDE'])) { $_POST['ALTITUDE'] = $devq_field[7]; }
+	$esc_LOCA = $_POST['LOCATION'];      //p.d.
+	$esc_LUNA = $_POST['LOCATION_UNAV']; //p.d.
+	if (!isset($devq_field[7])) { $devq_field[7] = 'NULL'; } //default-altitude
+	if (!isset($_POST['ALTITUDE'])) { $_POST['ALTITUDE'] = $devq_field[7]; } // if posted
 	$esc_ALTI = $_POST['ALTITUDE'];
-	if (!isset($devq_field[8])) { $devq_field[8] = 'NULL'; } //groundheight
-	if (!isset($_POST['G_HEIGHT'])) { $_POST['G_HEIGHT'] = $devq_field[8]; }
+	if (!isset($devq_field[8])) { $devq_field[8] = 'NULL'; } //default-groundheight
+	if (!isset($_POST['G_HEIGHT'])) { $_POST['G_HEIGHT'] = $devq_field[8]; } //if posted
 	$esc_GHGT = $_POST['G_HEIGHT'];
+	if (!isset($devq_field[9])) { $devq_field[9] = 'NULL'; } //default-place
+	if (!isset($_POST['PLACE'])) { $_POST['PLACE'] = $devq_field[9]; } //if posted
 	$esc_PLCE = $_POST['PLACE'];
-	$esc_CNTN = $contentf;
-	$esc_MTYP = $_POST['MIMETYPE']; //processed
+	$esc_CNTN = $contentf; //p.d.
+	$esc_MTYP = $_POST['MIMETYPE']; //p.d.
 	$esc_DATA = $_POST['DATA'];
 	$esc_TAG  = $_POST['TAG'];
 	$esc_TAXN = $_POST['TAXONOMY'];
