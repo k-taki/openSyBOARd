@@ -8,7 +8,7 @@ article#device {
 		padding:10px;
 		padding-bottom:40px;
 		width:900px;
-		height:1000px;
+		height:1400px;
 		border-radius:10px 10px 10px 10px;
 		}
 
@@ -97,7 +97,21 @@ section.dat	{
 		background-color:transparent;
 		}
 
-
+section#graph	{
+		clear:both;
+		text-align:center;
+		margin:5px auto;
+		padding:5px;
+		width:800px;
+		height:450px;
+		background-color:transparent;
+		}
+p.graph-title	{
+		font-size:16px;
+		font-weight:bold;
+		text-align:center;
+		margin:50px 0 0;
+		}
 
 
 /*EOF*/

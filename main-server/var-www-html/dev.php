@@ -99,6 +99,7 @@
 <body>
 <div id="container">
 <?php include '_htmlbodyheader.html'; ?>
+<script type="text/javascript" src="./js/flotr2.min.js"></script>
 <!-- X ---------------------------------------------------------------------- X -->
 
 
@@ -191,9 +192,60 @@
 
 
 		<!-- Graph -->
-		<h2>Graph Viewer</h2>
-		<section class="dat">
-			------------------------- 準備中です -------------------------
+		<h2>Graph View</h2>
+		<section id="graph">
+		<script type="text/javascript">
+			(function basic(container) {
+				var d1 = [
+					[1, 70],
+					[2, 68],
+					[3, 65],
+					[4, 67],
+					[5, 64],
+					[6, 61],
+					[7, 60],
+					[8, 62],
+					[9, 68],
+					[10, 67],
+					[11, 70],
+					[12, 72]
+					],
+				d2 = [
+					[1, 70],
+					[2, 69],
+					[3, 70],
+					[4, 71],
+					[5, 69],
+					[6, 70],
+					[7, 69],
+					[8, 68],
+					[9, 69],
+					[10, 70],
+					[11, 73],
+					[12, 75]
+					],
+				data = [{
+					data: d1,
+					label: "2012年"
+					}, {
+					data: d2,
+					label: "2000年"
+				}];
+
+			function labelFn(label) {
+				return label;
+			}
+
+			graph = Flotr.draw(container, data, {
+				legend: {
+					position: "se",
+					labelFormatter: labelFn,
+					backgroundColor: "#D2E8FF"
+				},
+				HtmlText: false
+			});
+		})(document.getElementById("graph"));
+		</script>
 		</section>
 
 
