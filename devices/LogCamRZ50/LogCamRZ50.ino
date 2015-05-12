@@ -7,6 +7,8 @@
 #include <a3gs2.h>
 #include <Adafruit_VC0706.h>
 
+#define DHTport 54
+
 /*
 D0    Serial RX
 D1    Serial TX
@@ -48,6 +50,9 @@ D51   SD SPI        (pin 12 on the shield)
 D52   SD SPI        (pin 13 on the shield)
 D53   SD ChipSelect (pin  4 on the shield)
 
+A0    AM2302 (D54)
+A1    CdS    (D55)
+
 */
 
 
@@ -55,7 +60,8 @@ D53   SD ChipSelect (pin  4 on the shield)
 
 
 // initialize fail frag
-boolean fail = false;
+// 0(OK) - 1(SD card) - 2(Can't get epoch) - 3(3G unavailable)
+int fail = 0;
 
 // GPS warmup level
 // 3(Hot) - 2(Warm) - 1(Cold) - 0(Cold) - -1(Init)
@@ -73,6 +79,19 @@ unsigned long loopnum = 0;
 // Logfile name
 char csvfilename[13];
 
+// Environment data
+char temparature[6];
+char humidity[5];
+char brightness[5];
+
+// var for b64encode
+unsigned int fpos = 0;
+unsigned int curr = 0;
+unsigned int curb = 0;
+uint8_t buf[3] = {0x00,0x00,0x00};
+uint8_t bin[4] = {0x00,0x00,0x00,0x00};
+
+
 uint32_t epoch = 0;
 char date[a3gsDATE_SIZE], time[a3gsTIME_SIZE];
 char res[a3gsMAX_RESULT_LENGTH+1];
@@ -82,7 +101,7 @@ int rssi = -127;
 Adafruit_VC0706 cam = Adafruit_VC0706(&Serial2);
 volatile const uint8_t *b64table = (uint8_t *)"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 const char *server = "ec2-54-249-238-92.ap-northeast-1.compute.amazonaws.com";
-const char *path = "/api/original/upload.php";
+const char *path = "/api/org/upload.php";
 const int port = 80;
 const char *ACCESSKEY = "302694d24e41fef85ce10a3677d1e0018b4c3074";
 char lat[15], lon[15];
@@ -101,10 +120,144 @@ float estfsize;
 
 
 
+
+
+
+
+
+
+
+void DHTInit(void) {
+  pinMode(DHTport,INPUT);
+  delay(250);
+}
+byte DHTTSSeq(void) {
+  byte dht11_in;
+  // start condition
+  // pull-down i/o pin from 18ms
+  digitalWrite(DHTport, LOW);
+  pinMode(DHTport,OUTPUT);
+  delay(1);
+  pinMode(DHTport,INPUT);
+  delayMicroseconds(20+40); // High 20us + Slave ACK 80us/2
+
+  dht11_in = digitalRead(DHTport); // Normal State = LOW
+  if(dht11_in){
+    lcd.setCursor(0,0); lcd.print("! DHT Error (1) ");
+    return(1);
+  }
+  delayMicroseconds(80);
+  dht11_in = digitalRead(DHTport); // Normal State = HIGH
+  if(!dht11_in){
+    lcd.setCursor(0,0); lcd.print("! DHT Error (2) ");
+    return(1);
+  }
+  while( digitalRead(DHTport) ); // port LOW?
+  return(0);
+}
+byte read_dht11_dat(){
+  byte i = 0;
+  byte result=0;
+  for(i=0; i< 8; i++){
+    while( !digitalRead(DHTport) ); // port High?
+    delayMicroseconds(49); // 28us or 70us 
+    if( digitalRead(DHTport) ){
+    result |=(1<<(7-i));
+    while( digitalRead(DHTport) );
+    }
+  }
+  return result;
+}
+void DHT_ACK(void) {
+  while( digitalRead(DHTport) );
+  delayMicroseconds(50);
+}
+
+
+void envmajor() {
+  byte dht11_dat[5];
+  byte i;
+  byte dht11_check_sum;
+  float hum,temp;
+
+  DHTInit();
+  DHTTSSeq();
+  for (i=0; i<5; i++) dht11_dat[i] = read_dht11_dat();
+  DHT_ACK();
+  dht11_check_sum = dht11_dat[0]+dht11_dat[1]+dht11_dat[2]+dht11_dat[3];
+  if(dht11_dat[4]!= dht11_check_sum){
+    lcd.setCursor(0,0); lcd.print("! DHT Error (3) "); // checksum error
+  }
+  temp = ((float)(dht11_dat[2]&0x7F)*256.+(float)dht11_dat[3])/10;
+  if( dht11_dat[2] & 0x80 ) temp *= -1;
+  hum = ((float)dht11_dat[0]*256.+(float)dht11_dat[1])/10;
+  
+  
+  
+  File envdata = SD.open("envdata.txt", FILE_WRITE);
+  
+  int brgt = analogRead(55);
+  // temp  hum  br
+  // 0123450123401234
+ 
+ 
+  // temp
+  envdata.seek(0);
+  envdata.print("+00.0");
+  if (temp < 0) envdata.seek(1);
+  if (temp >= 0 && brgt < 10) envdata.seek(2);
+  if (brgt >= 10) envdata.seek(1);
+  envdata.print(temp,1);
+  envdata.seek(0);
+  temparature[0] = envdata.read(); temparature[1] = envdata.read(); temparature[2] = envdata.read(); temparature[3] = envdata.read(); temparature[4] = envdata.read(); temparature[5] = 0x00;
+
+  // hum
+  envdata.seek(6);
+  envdata.print("00.0");
+  if (hum < 10) envdata.seek(7);
+  if (brgt >= 10) envdata.seek(6);
+  envdata.print(hum,1);
+  envdata.seek(6);
+  humidity[0] = envdata.read(); humidity[1] = envdata.read(); humidity[2] = envdata.read(); humidity[3] = envdata.read(); humidity[4] = 0x00;
+
+  // bright
+  envdata.seek(11);
+  envdata.print("0000");
+  if (brgt <= 9) envdata.seek(14);
+  if (brgt >= 10 && brgt <= 99) envdata.seek(13);
+  if (brgt >= 100 && brgt <= 999) envdata.seek(12);
+  if (brgt >= 1000) envdata.seek(11);
+  envdata.print(brgt);
+  envdata.seek(11);
+  brightness[0] = envdata.read(); brightness[1] = envdata.read(); brightness[2] = envdata.read(); brightness[3] = envdata.read(); brightness[4] = 0x00;
+
+  lcd.setCursor(0,1); lcd.print(temparature); lcd.print("degC, ");
+  lcd.setCursor(11,1); lcd.print(humidity); lcd.print("%"); 
+  
+  envdata.close();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 void location() {
   a3gs.setLED(true);
   // GPS Check
-  lcd.setCursor(0,1); lcd.print("Searching...    ");
+  lcd.setCursor(0,0); lcd.print("GPS Searching.. ");
   if (a3gs.getLocation(a3gsMPBASED, lat, lon) == 0) {
   // GPS AVAILABLE
     gpsLEV = 3;
@@ -124,42 +277,55 @@ void location() {
   a3gs.setLED(false);
 
   // Write DATA
+  logFile = SD.open(csvfilename, FILE_WRITE);
   lcd.clear();
   if (gpsLEV == 3) {
-    lcd.print("GPS GOOD.");
+    lcd.print("GPS GOOD");
     if (a3gsAVL == true) {
       a3gs.getTime(date, time);
       logFile.print(loopnum); logFile.print(","); logFile.print(time);
-      lcd.setCursor(0,1); lcd.print("LOG: ");
+      lcd.setCursor(0,1); lcd.print("LOGGED> ");
       lcd.setCursor(5,1); lcd.print(time);
     } else {
       logFile.print(loopnum); logFile.print(","); logFile.print("unknown");
-      lcd.setCursor(0,1); lcd.print("3G Network down.");
+      lcd.setCursor(0,1); lcd.print("3G Network down");
     }
-    logFile.print(","); logFile.print(lon); logFile.print(","); logFile.print(lat); logFile.print("\n");
+    logFile.print(","); logFile.print(lon); logFile.print(","); logFile.print(lat); logFile.print(","); logFile.print(temparature); logFile.print(","); logFile.print(humidity); logFile.print(","); logFile.print(brightness); logFile.print("\n");
     loopnum++;
   } else {
     if (gpsLEV == 2) {
-      lcd.print("GPS LOST LV1.");
+      lcd.print("GPS LOST LV1");
     }
     if (gpsLEV == 1) {
-      lcd.print("GPS LOST LV2.");
+      lcd.print("GPS LOST LV2");
     }
     if (gpsLEV == 0) {
-      lcd.print("GPS LOST LV3.");
+      lcd.print("GPS LOST LV3");
     }
     if (gpsLEV == -1) {
-      lcd.print("GPS warming up,");
+      lcd.print("GPS warming up");
     }
     if (a3gsAVL == true) {
       a3gs.getTime(date, time);
-      lcd.setCursor(0,1); lcd.print("UPDATE: ");
+      lcd.setCursor(0,1); lcd.print("UPDATE> ");
       lcd.setCursor(8,1); lcd.print(time);
     } else {
-      lcd.setCursor(0,1); lcd.print("3G Network down.");
+      lcd.setCursor(0,1); lcd.print("3G Network down");
     }
   }
+  logFile.close();
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -241,14 +407,14 @@ void pict() {
     //
     // HTTP POST
     if (a3gs.connectTCP(server, port) != 0) {
-      lcd.setCursor(0,1); lcd.print("HTTP POST [FAIL]");
+      lcd.setCursor(0,1); lcd.print("connectTCP[FAIL]");
       delay(2000);
     } else {
       // Send POST request
-      lcd.setCursor(0,1); lcd.print("HTTP POST [OK]  ");
+      lcd.setCursor(0,1); lcd.print("connectTCP  [OK]");
       delay(2000);
       // ->HEAD<-
-      a3gs.write("POST /api/original/upload.php HTTP/1.1$n");
+      a3gs.write("POST /api/org/upload.php HTTP/1.1$n");
       a3gs.write("HOST: "); a3gs.write(server); a3gs.write("$n");
       a3gs.write("Content-Type: text/plain$n");
       a3gs.write("Content-Length: "); a3gs.write("20000"); a3gs.write("$n$n");
@@ -256,30 +422,29 @@ void pict() {
       a3gs.write("[ACCESSKEY]"); a3gs.write(ACCESSKEY);
       a3gs.write("[DATE]"); a3gs.write(date);
       a3gs.write("[TIME]"); a3gs.write(time);
-      a3gs.write("[TIMEZONE]9[TAG]#testdata");
+      a3gs.write("[TIMEZONE]9");
+      a3gs.write("[TAG]#testdata");
       a3gs.write("[LOCATION]"); a3gs.write(lon); a3gs.write(" "); a3gs.write(lat);
-      a3gs.write("[MIMETYPE]image/jpeg[CONTENT]");
-
+      a3gs.write("[PLACE]Sony CSL");
+      a3gs.write("[DATA]"); Serial.print("[DATA]");
+      a3gs.write("TEMP=");  a3gs.write(temparature); a3gs.write(";");
+      a3gs.write("HUMD=");  a3gs.write(humidity); a3gs.write(";");
+      a3gs.write("BRGT=");  a3gs.write(brightness); a3gs.write(";");
+      a3gs.write("[MIMETYPE]image/jpeg");
+      if (!camAVL)
+        goto _nocam;
+      a3gs.write("[CONTENT]");
 
 
 //------------------------------------------------------------------------
   // SOMEHOW Not running in case use repeat style format (e.g. for, while)
   // Fragment:
   //
-  unsigned int fpos = 0;
-  unsigned int curr = 0;
-  unsigned int curb = 0;
-  uint8_t buf[3] = {0x00,0x00,0x00};
-  uint8_t bin[4] = {0x00,0x00,0x00,0x00};
   lcd.setCursor(0,0);
   while (fpos < minfile) {
-    myFile.seek(fpos); buf[0] = myFile.peek();
-    fpos++;
-    myFile.seek(fpos); buf[1] = myFile.peek();
-    fpos++;
-    myFile.seek(fpos); buf[2] = myFile.peek();
-    fpos++;
-
+    myFile.seek(fpos); buf[0] = myFile.peek(); fpos++;
+    myFile.seek(fpos); buf[1] = myFile.peek(); fpos++;
+    myFile.seek(fpos); buf[2] = myFile.peek(); fpos++;
     bitWrite(bin[0],5,bitRead(buf[0],7));
     bitWrite(bin[0],4,bitRead(buf[0],6));
     bitWrite(bin[0],3,bitRead(buf[0],5));
@@ -311,21 +476,14 @@ void pict() {
       curb = curb + 300;
       curr = 0;
       float percentage = (float)curb / estfsize;
-      lcd.clear();
-      lcd.setCursor(0,0); lcd.print("Uploading...");
-      lcd.setCursor(0,1);
-      lcd.print(percentage*100);
-      lcd.print("% / ");
-      lcd.print(curb);
-      lcd.print("B");
+      lcd.clear(); lcd.print("Uploading..");
+      lcd.setCursor(0,1); lcd.print(percentage*100); lcd.print("% / "); lcd.print(curb); lcd.print("B");
     }
   }//while (fpos < minfile)
 
   if (filesize - fpos == 2) { //when % = 2
-    myFile.seek(fpos); buf[0] = myFile.peek();
-    fpos++;
-    myFile.seek(fpos); buf[1] = myFile.peek();
-    fpos++;
+    myFile.seek(fpos); buf[0] = myFile.peek(); fpos++;
+    myFile.seek(fpos); buf[1] = myFile.peek(); fpos++;
     bitWrite(bin[0],5,bitRead(buf[0],7));
     bitWrite(bin[0],4,bitRead(buf[0],6));
     bitWrite(bin[0],3,bitRead(buf[0],5));
@@ -348,8 +506,7 @@ void pict() {
   }
 
   if (filesize - fpos == 1) { //when % = 1
-    myFile.seek(fpos); buf[0] = myFile.peek();
-    fpos++;
+    myFile.seek(fpos); buf[0] = myFile.peek(); fpos++;
     bitWrite(bin[0],5,bitRead(buf[0],7));
     bitWrite(bin[0],4,bitRead(buf[0],6));
     bitWrite(bin[0],3,bitRead(buf[0],5));
@@ -368,7 +525,7 @@ void pict() {
 
 
 
-
+    _nocam:
       myFile.close();
       a3gs.write("$n$n");
       a3gs.setLED(false);
@@ -377,16 +534,26 @@ void pict() {
       //while(( a3gs.read(res,a3gsMAX_RESULT_LENGTH+1)) > 0) {
       //  Serial.print(res);
       //}
-      lcd.clear(); lcd.print("Disconnecting...");
+      lcd.clear(); lcd.print("Disconnecting..");
       a3gs.disconnectTCP();
-      delay(2);
+      delay(10);
 //------------------------------------------------------------------------
 
   
+    }
+    return;
   }
-  return;
 }
-}
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -402,7 +569,8 @@ void setup() {
   pinMode(53, OUTPUT);
   pinMode(3, INPUT);
   lcd.begin(16, 2);
-  lcd.print("Ready.");
+  lcd.print("HELLO THIS IS");
+  lcd.setCursor(0,1); lcd.print("ARD-LogCam v1.2");
   //Serial.begin(9600);
   delay(3000);    // Wait for start serial monitor
 
@@ -410,51 +578,53 @@ void setup() {
   lcd.clear();
   // SD init
   if (!SD.begin(53)) {
-    lcd.print("SD card failed!");
-    fail = true;
+    lcd.print("Please re-insert");
+    lcd.setCursor(0,1); lcd.print("your microSD!");
+    fail = 1;
     delay(3000);
-    lcd.clear(); lcd.print("Retry...");
+    lcd.clear(); lcd.print("Retrying..");
     delay(5000);
     goto _retry;
     return;
   }
-  lcd.print("SD card OK.");
+  lcd.print("SD card [OK]");
+  fail = 0;
   delay(1000);
 
   // Camera init
   lcd.clear();
   if (cam.begin()) {
-    lcd.print("Camera OK.");
+    lcd.print("Camera  [OK]");
     camAVL = true;
     cam.getVersion();
     delay(10);
     cam.setImageSize(VC0706_320x240);
   } else {
-    lcd.print("No camera found!");
+    lcd.print("No camera found");
+    lcd.setCursor(0,1); lcd.print("Mode: Log-only");
     camAVL = false;
+    delay(2000);
   }
   delay(1000);
   //if (SD.exists("gpslog.csv") == true) {
   //  SD.remove("gpslog.csv");
   //}
 
-  lcd.clear(); lcd.print("3G initialize...");
+  lcd.clear(); lcd.print("3G initializing,");
+  lcd.setCursor(0,1); lcd.print("Please wait.");
   if (a3gs.start() == 0 && a3gs.begin(0,115200) == 0) {
-    lcd.clear(); lcd.print("3G Available.");
+    lcd.clear(); lcd.print("3G Available");
     lcd.setCursor(0,1);
     if (a3gs.getTime2(epoch) == 0) {
       a3gs.getRSSI(rssi) == 0;
-      lcd.print("RSSI = ");
-      lcd.print(rssi);
-      lcd.print(" dBm.");
+      lcd.print("RSSI = "); lcd.print(rssi); lcd.print(" dBm");
     } else {
-      lcd.println("Epoch unknown.");
-      fail = true;
+      lcd.println("Can't get TIME");
+      fail = 2;
     }
   } else {
-    lcd.setCursor(0,1);
-    lcd.print("Failed.");
-    fail = true;
+    lcd.clear(); lcd.print("3G Unavailable");
+    fail = 3;
   }
   delay(3000);
 
@@ -471,18 +641,18 @@ void setup() {
   for (int i = 0; i < 100; i++) {
     csvfilename[7] = 'A' + i;
     // create if does not exist, do not open existing, write, sync after write
-    if (! SD.exists(csvfilename)) {
+    if (! SD.exists(csvfilename))
       break;
-    }
   }
-  lcd.clear();
-  lcd.print("Logfile created:");
-  lcd.setCursor(0,1);
-  lcd.print(csvfilename);
+  lcd.clear(); lcd.print("Logfile created:");
+  lcd.setCursor(0,1); lcd.print(csvfilename);
   delay(3000);
-  lcd.clear();
-  lcd.print("GPS initialize,");
+  lcd.clear(); lcd.print("GPS initializing");
 }
+
+
+
+
 
 
 
@@ -501,20 +671,27 @@ void setup() {
 
 
 void loop() {
-  if (fail == false) {
-    logFile = SD.open(csvfilename, FILE_WRITE);
+  if (fail == 0) {
+    envmajor();
+    // Self interrupt to take photo 1
+    for (int i = 0; i < 10; i++) {
+      if (digitalRead(3) == HIGH)
+        pict();
+      delay(500);
+    }
     location();
-    logFile.close();
+    // Self interrupt to take photo 2
+    for (int i = 0; i < 10; i++) {
+      if (digitalRead(3) == HIGH)
+        pict();
+      delay(500);
+    }
+    
+    
+    
   } else {
-    lcd.clear();
-    lcd.print("INIT ERROR!!");
-  }
-
-  // Self interrupt to take photo
-  for (int i = 0; i < 20; i++) {
-    if (digitalRead(3) == HIGH)
-      pict();
-    delay(500);
+    lcd.clear(); lcd.print("INIT ERROR");
+    lcd.setCursor(0,1); lcd.print("CODE = "); lcd.print(fail);
   }
 }
 

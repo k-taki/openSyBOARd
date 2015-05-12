@@ -99,6 +99,7 @@
 <body>
 <div id="container">
 <?php include '_htmlbodyheader.html'; ?>
+<script type="text/javascript" src="./js/flotr2.js"></script>
 <!-- X ---------------------------------------------------------------------- X -->
 
 
@@ -197,16 +198,15 @@
 
 		<!-- Graph -->
 		<h2>Graph View</h2>
-		<div id="graphview"></div>
-		<script type="text/javascript" src="./js/flotr2.min.js"></script>
+		<section id="graph">
 		<script type="text/javascript">
-		(function basic_time(graphview) {
+		(function basic_time(container) {
 			var
-				d1    = [],
-				start = new Date("2009/01/01 01:00").getTime(),
-				options,
-				graph,
-				i, x, o;
+			d1    = [],
+			start = new Date("2009/01/01 01:00").getTime(),
+			options,
+			graph,
+			i, x, o;
 			
 			for (i = 0; i < 100; i++) {
 				x = start+(i*1000*3600*24*36.5);
@@ -214,23 +214,32 @@
 			}
 			
 			options = {
-				xaxis : { mode : 'time', labelsAngle : 45 },
-				selection : { mode : 'x' },
+				xaxis : {
+					mode : 'time', 
+					labelsAngle : 45
+				},
+				selection : {
+					mode : 'x'
+				},
 				HtmlText : false,
 				title : 'Time'
 			};
 			
 			// Draw graph with default options, overwriting with passed options
 			function drawGraph (opts) {
-				// Clone the options, so the 'options' variable always keeps intact.
-				o = Flotr._.extend(Flotr._.clone(options), opts || {});
-				// Return a new graph.
-				return Flotr.draw(graphview, [d1], o);
+			// Clone the options, so the 'options' variable always keeps intact.
+			o = Flotr._.extend(Flotr._.clone(options), opts || {});
+			// Return a new graph.
+			return Flotr.draw(
+				container,
+				[ d1 ],
+				o
+				);
 			}
 			
 			graph = drawGraph();
 			
-			Flotr.EventAdapter.observe(graphview, 'flotr:select', function(area){
+			Flotr.EventAdapter.observe(container, 'flotr:select', function(area){
 				// Draw selected area
 				graph = drawGraph({
 					xaxis : { min : area.x1, max : area.x2, mode : 'time', labelsAngle : 45 },
@@ -239,14 +248,44 @@
 			});
 			
 			// When graph is clicked, draw the graph with default area.
-			Flotr.EventAdapter.observe(graphview, 'flotr:click', function () { graph = drawGraph(); });
+			Flotr.EventAdapter.observe(container, 'flotr:click', function () { graph = drawGraph(); });
 		})
 		(document.getElementById("editor-render-0"));
-		</script>
 
 
 
-
+<?php  // PHP_CODE -----------------------------------------------------------------------------
+	//ini_set('display_errors', 'On');
+				mysqli_data_seek($dataquery,0); // index reset
+				for ($i=0; $i<=$datrow_cnt; $i++) {
+					// RENEW
+					$datq_field = mysqli_fetch_row($dataquery);
+					$val_X[$i] = $datq_field[3]; // time(h:m:s)
+					
+					// GET DATA STRING (a entry)
+					$data_PART = explode(")", $datq_field[13]); // ) (key-left split) ex: "TEMP(22.1"+"HUMD(56.0"+...
+					$data_NUM = count($data_PART); // number of data-type
+					
+					for ($j=0; $j<$data_NUM; $j++) {
+						$data_part_split = explode("(", $data_PART[$j]); // ( (key-right split) ex: "TEMP"+"22.1"
+						$val_Y[$j][$i] = (float)$data_part_split[1]; // define val_Y[key-index][entry-number]=value
+						$series_name[$j] = $data_part_split[0]; // key name
+					}
+					
+					// Convert datetime to unix-epoch
+					$ex_date = explode("-", $datq_field[2]); $ex_time = explode(":", $datq_field[3]);
+					$ep_timestamp[$i] = mktime($ex_time[0],$ex_time[1],$ex_time[2],$ex_date[1],$ex_date[2],$ex_date[0]);
+					
+					
+					// DRAW GRAPH
+					if ($i>=4) {
+						echo "[ new Date(".$ep_timestamp[$i]."), ".$val_Y[0][$i]."]"; // delete last comma
+						break; // latest 5 entries
+					} else {
+						echo "[ new Date(".$ep_timestamp[$i]."), ".$val_Y[0][$i]."],";
+					}
+				}
+?> // PHP_CODE -----------------------------------------------------------------------------
 
 
 

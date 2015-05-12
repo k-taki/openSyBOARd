@@ -16,8 +16,8 @@ unsigned long Press,Temp;
 /*
 --- Standard I/O pins allocation ---
 
-D0    Serial RX (XBee)
-D1    Serial TX (XBee)
+D0    Serial RX (to XBee TX)
+D1    Serial TX (to XBee RX)
 D2
 D3
 D4
@@ -35,7 +35,7 @@ A1    CdS cell voltage input
 A2
 A3
 A4
-A5    DHT11 input
+A5    AM2302 input
 
 */
 
@@ -53,7 +53,7 @@ byte DHTTSSeq(void) {
 	// 1. pull-down i/o pin from 18ms
 	digitalWrite(DHTport, LOW);
 	pinMode(DHTport,OUTPUT);
-	delay(30);
+	delay(1);
 	pinMode(DHTport,INPUT);
 	delayMicroseconds(20+40);	// High 20us + Slave ACK 80us/2
 
@@ -102,21 +102,22 @@ void DHT_GET(void) {
 	DHT_ACK();
 	dht11_check_sum = dht11_dat[0]+dht11_dat[1]+dht11_dat[2]+dht11_dat[3];
 	if(dht11_dat[4]!= dht11_check_sum){
-		Serial.println("DHT11 checksum error");
+		Serial.println("AM2302 checksum error");
 	}
 
 
 
 
-	temp =  (float)dht11_dat[2];
-	Serial.print("TEMP=");
+	temp = ((float)(dht11_dat[2]&0x7F)*256.+(float)dht11_dat[3])/10;
+        if( dht11_dat[2] & 0x80 ) temp *= -1;
+        Serial.print("TEMP(");
 	Serial.print( temp , 1 );
-	Serial.print(";");
+	Serial.print(")");
 	
-	hum =  (float)dht11_dat[0];
-	Serial.print("HUMD=");
+	hum = ((float)dht11_dat[0]*256.+(float)dht11_dat[1])/10;
+	Serial.print("HUMD(");
 	Serial.print( hum , 1 );
-	Serial.print(";");
+	Serial.print(")");
 }
 
 
@@ -223,15 +224,15 @@ void ACCMES(void) {
 }
 
 void CdS(void) {
-        Serial.print("BRGT=");
+        Serial.print("BRGT(");
         Serial.print(analogRead(1));
-        Serial.print(";");
+        Serial.print(")");
 }
 
 void Moi(void) {
-        Serial.print("MOIS=");
+        Serial.print("SOIL(");
         Serial.print(analogRead(0));
-        Serial.print(";");
+        Serial.print(")");
 }
 
 void PreS(void) {
@@ -257,9 +258,9 @@ void PreS(void) {
         Press = p / 30 ;
         Temp  = t / 30 ;
         ans = PressureCalc();
-        Serial.print("PRES=");
+        Serial.print("PRES(");
         Serial.print(ans);
-        Serial.print(";");
+        Serial.print(")");
         SPI.end();
         delay(10);
         digitalWrite(7,LOW); // Sensor OFF

@@ -4,6 +4,7 @@
 //#include <MsTimer2.h>
 //#include <Prescaler.h>
 #include <Adafruit_VC0706.h>
+#include <SPI.h>
 #include <SD.h>
 #include <SoftwareSerial.h>
 #include <a3gs2.h>
@@ -620,7 +621,7 @@ void report() {
 
 void setup() {
   pinMode(53, OUTPUT);
-  Serial.begin(38400);
+  Serial.begin(9600);
   delay(3000);  // Wait for Start Serial Monitor
   Serial.println("Ready.");
   //set_sleep_mode(SLEEP_MODE_PWR_SAVE);

@@ -5,6 +5,7 @@
 //#include <MsTimer2.h>
 //#include <Prescaler.h>
 #include <Adafruit_VC0706.h>
+#include <SPI.h>
 #include <SD.h>
 #include <SoftwareSerial.h>
 #include <a3gs2.h>
@@ -30,13 +31,15 @@ boolean blinker = false;
 volatile unsigned long intervalnext = 2700000; // Sleep interval(ms), default value is 1 hour.
 
 char xbfrom[9] = "00000000";
+int xbtemp_m = 0; int xbtemp_l = 0;
+int xbvolts_m = 0; int xbvolts_l = 0;
 
 char temparature[6];
 char humidity[5];
 char brightness[5];
 
 boolean debugon = false;
-char debugstr[8];
+char debugstr[9] = "--------";
 /*
   0 = start bit
   1 = SD card
@@ -46,6 +49,7 @@ char debugstr[8];
   5 = fetch
   6 = connectTCP
   7 = waiting mode
+  8 = NULL char
 */
 
 
@@ -116,13 +120,15 @@ void itp() {
   Serial.print("Mode = ");
   Serial.println(mode);
   debugstr[7] = mode;
-  // loop costs 4 minutes!
   if (debugon == true)
     report();
   if (mode == 'Z') {
+    Serial3.flush();
     Serial.println("Waiting XBee...");
+    int cnt = 0;
     while (true) {
       delay(1000);
+      // Waiting XBee Serial Port
       if (Serial3.available() > 0) {
         uint8_t res[16];
         for (int i=0; i<=16; i++) {
@@ -144,6 +150,15 @@ void itp() {
         xbdat.seek(0);
         xbfrom[0] = xbdat.read(); xbfrom[1] = xbdat.read(); xbfrom[2] = xbdat.read(); xbfrom[3] = xbdat.read(); xbfrom[4] = xbdat.read(); xbfrom[5] = xbdat.read(); xbfrom[6] = xbdat.read(); xbfrom[7] = xbdat.read(); xbfrom[8] = 0x00;
         if ((res[8]!=0xFF)&(res[8]!=0x00)) { break;}
+        
+        // To send sensor data per 3 hour
+        cnt++;
+        if (cnt >= 7200) {
+          cnt = 0;
+          a3gs.getTime(date, time);
+          // time = 0,4,8,12,16,20
+          if ( (time[0]=0)&(time[1]=0) | (time[0]=0)&(time[1]=4) | (time[0]=0)&(time[1]=8) | (time[0]=1)&(time[1]=2) | (time[0]=1)&(time[1]=6) | (time[0]=2)&(time[1]=0) ) { xbsensing(); }
+        }
       }
       /*
       if (cam.motionDetected()) {
@@ -328,7 +343,7 @@ void envmajor() {
 
 void mainframe() {
   
-  debugstr[4] = 'N';
+  debugstr[4] = 'U';
   /*
   cam.reset();
   cam.setImageSize(VC0706_320x240);
@@ -439,6 +454,11 @@ void mainframe() {
   */
 
 
+    Serial.print("XBee Temparature: "); ATTP(); Serial.println("degC");
+    Serial.print("XBee Volts: "); ATpcV();Serial.println("mV");
+    Serial.println("");
+
+
 
     debugstr[6] = 'N';
     if (a3gs.connectTCP(server, port) != 0) {
@@ -452,7 +472,7 @@ void mainframe() {
       
       a3gs.write("[ACCESSKEY]"); a3gs.write(ACCESSKEY);
       Serial.print("[ACCESSKEY]"); Serial.print(ACCESSKEY);
-      a3gs.write("[PLACE]Mt.Koma"); Serial.print("[PLACE]Mt.Koma");
+      //a3gs.write("[PLACE]Mt.Koma"); Serial.print("[PLACE]Mt.Koma");
       a3gs.write("[TAG]"); Serial.print("[TAG]");
       if (mode == 'Z') {
         a3gs.write("#MotionDetect"); Serial.print("#MotionDetect");
@@ -460,13 +480,16 @@ void mainframe() {
         a3gs.write("#ConstInterval"); Serial.print("#ConstInterval");
       }
       a3gs.write("[DATA]"); Serial.print("[DATA]");
-      if (xbfrom == "00000000") {
-        a3gs.write("XBEE_ERROR=true;");
-        Serial.print("XBEE_ERROR=true;");
-      } else {
-        a3gs.write("XBEE_ON="); a3gs.write(xbfrom); a3gs.write(";");
-        Serial.print("XBEE_ON="); Serial.print(xbfrom); Serial.print(";");
-      }
+      a3gs.write("XBEE_ON("); a3gs.write(xbfrom); a3gs.write(")");
+      Serial.print("XBEE_ON("); Serial.print(xbfrom); Serial.print(")");
+      a3gs.write("XBEE_TEMP_M("); a3gs.write(xbtemp_m); a3gs.write(")");
+      Serial.print("XBEE_TEMP_M("); Serial.print(xbtemp_m); Serial.print(")");
+      a3gs.write("XBEE_TEMP_L("); a3gs.write(xbtemp_l); a3gs.write(")");
+      Serial.print("XBEE_TEMP_L("); Serial.print(xbtemp_l); Serial.print(")");
+      a3gs.write("XBEE_VOLTS_M("); a3gs.write(xbvolts_m); a3gs.write(")");
+      Serial.print("XBEE_VOLTS_M("); Serial.print(xbvolts_m); Serial.print(")");
+      a3gs.write("XBEE_VOLTS_L("); a3gs.write(xbvolts_l); a3gs.write(")");
+      Serial.print("XBEE_VOLTS_L("); Serial.print(xbvolts_l); Serial.print(")");
       /*
       a3gs.write("[DATA]"); Serial.print("[DATA]");
       a3gs.write("TEMP=");  a3gs.write(temparature); a3gs.write(";");
@@ -632,6 +655,114 @@ void mainframe() {
 
 
 
+void xbsensing() {
+  
+  // take pict is unavailable
+  debugstr[4] = 'U';
+    // mkdir and create pictfile
+    a3gs.getTime(date, time);
+    char pictfolder[8];
+    strcpy(pictfolder, "/012345");
+    pictfolder[1] = date[2];
+    pictfolder[2] = date[3];
+    pictfolder[3] = date[5];
+    pictfolder[4] = date[6];
+    pictfolder[5] = date[8];
+    pictfolder[6] = date[9];
+    // debug report will send or not
+    if (!SD.exists(pictfolder)) {
+      SD.mkdir(pictfolder);
+      debugon = true;
+    }
+
+
+
+
+
+
+
+
+
+    // access server config message
+    len = (int*)sizeof(res);
+    if (a3gs.httpPOST(server, port, pathF, header, body, res, len, false) == 0) {
+      Serial.print("[OK]     httpPOST() to ");
+      Serial.println(server);
+      mode = (volatile char)res[0];
+      Serial.print("[Info]   Server config file set as [");
+      Serial.print(mode);
+      Serial.println("]");
+      debugstr[5] = 'Y';
+    }
+    else {
+      Serial.print("[Failed] httpPOST() from ");
+      Serial.println(server);
+      debugstr[5] = 'N';
+    }
+
+
+
+
+
+    Serial.print("XBee Temparature: "); ATTP(); Serial.println("degC");
+    Serial.print("XBee Volts: "); ATpcV();Serial.println("mV");
+    Serial.println("");
+
+
+
+    debugstr[6] = 'N';
+    if (a3gs.connectTCP(server, port) != 0) {
+      Serial.print("[Failed] connectTCP()");
+    } else {
+      // Send POST request
+      a3gs.write("POST /api/original/upload.php HTTP/1.1$n");
+      a3gs.write("HOST: "); a3gs.write(server); a3gs.write("$n");
+      a3gs.write("Content-Type: text/plain$n");
+      a3gs.write("Content-Length: "); a3gs.write("20000"); a3gs.write("$n$n");
+      
+      a3gs.write("[ACCESSKEY]"); a3gs.write(ACCESSKEY);
+      Serial.print("[ACCESSKEY]"); Serial.print(ACCESSKEY);
+      a3gs.write("[TAG]"); Serial.print("[TAG]");
+      a3gs.write("#ConstInterval"); Serial.print("#ConstInterval");
+      a3gs.write("[DATA]"); Serial.print("[DATA]");
+      a3gs.write("XBEE_TEMP_M("); a3gs.write(xbtemp_m); a3gs.write(")");
+      Serial.print("XBEE_TEMP_M("); Serial.print(xbtemp_m); Serial.print(")");
+      a3gs.write("XBEE_TEMP_L("); a3gs.write(xbtemp_l); a3gs.write(")");
+      Serial.print("XBEE_TEMP_L("); Serial.print(xbtemp_l); Serial.print(")");
+      a3gs.write("XBEE_VOLTS_M("); a3gs.write(xbvolts_m); a3gs.write(")");
+      Serial.print("XBEE_VOLTS_M("); Serial.print(xbvolts_m); Serial.print(")");
+      a3gs.write("XBEE_VOLTS_L("); a3gs.write(xbvolts_l); a3gs.write(")");
+      Serial.print("XBEE_VOLTS_L("); Serial.print(xbvolts_l); Serial.print(")");
+      Serial.println(""); Serial.println("");
+
+
+
+
+
+      // Recieve responces
+      char res[a3gsMAX_RESULT_LENGTH+1];
+      while(( a3gs.read(res,a3gsMAX_RESULT_LENGTH+1)) > 0) {
+        Serial.print(res);
+      }
+      Serial.println("[Info]   Disconnecting...");
+      a3gs.disconnectTCP();
+      debugstr[6] = 'Y';
+    }
+  Serial.println("");
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void report() {
   int resultPOST = a3gs.connectTCP(server, port);
@@ -672,7 +803,37 @@ void ATSL() {
   Serial.print(res[10],HEX); Serial.print("-");
   Serial.print(res[11],HEX);
 }
-
+/*############### ATTP ###############*/
+void ATTP() {
+  uint8_t cmd[] = {0x7E,0x00,0x04,0x08,0x01,0x54,0x50,0x52};
+  uint8_t res[10];
+  Serial3.write(cmd,sizeof(cmd));
+  delay(200);
+  for (int i=0; i<=10; i++) {
+    res[i] = Serial3.read();
+    //Serial.print(res[i],HEX);
+    //Serial.print("-");
+  }
+  //Serial.print("********");
+  xbtemp_m = res[8]; xbtemp_l = res[9];
+  
+  Serial.print("256*"); Serial.print(res[8],DEC); Serial.print("+"); Serial.print(res[9],DEC);
+}
+/*############### AT%V ###############*/
+void ATpcV() {
+  uint8_t cmd[] = {0x7E,0x00,0x04,0x08,0x01,0x25,0x56,0x7B};
+  uint8_t res[10];
+  Serial3.write(cmd,sizeof(cmd));
+  delay(200);
+  for (int i=0; i<=10; i++) {
+    res[i] = Serial3.read();
+    //Serial.print(res[i],HEX);
+    //Serial.print("-");
+  }
+  //Serial.print("********");
+  xbvolts_m = res[8]; xbvolts_l = res[9];
+  Serial.print("256*"); Serial.print(res[8],DEC); Serial.print("+"); Serial.print(res[9],DEC);
+}
 
 
 
@@ -693,7 +854,7 @@ void ATSL() {
 void setup() {
   xbfrom[8] = 0x00;
   pinMode(53, OUTPUT);
-  Serial.begin(38400);
+  Serial.begin(9600);
   delay(3000);  // Wait for Start Serial Monitor
   Serial.println("Ready.");
   //set_sleep_mode(SLEEP_MODE_PWR_SAVE);
@@ -718,7 +879,7 @@ void setup() {
   }
   cam.setImageSize(VC0706_320x240);
   */
-  debugstr[2] = 'N';
+  debugstr[2] = 'U'; //unavailable
 
 
 

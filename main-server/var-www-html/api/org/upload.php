@@ -33,11 +33,11 @@
 
 	// original data language parser
 	$data_ALLRAW = file_get_contents("php://input");
-	$data_PART = explode("[", $data_ALLRAW); //[
+	$data_PART = explode("[", $data_ALLRAW); // [ (key-left split) ex: "KEY1]VAL1"+"KEY2]VAL2"+...
 	$data_NUM = count($data_PART);
 	for ($i=1; $i<$data_NUM; $i++) {
-		$data_part_split = explode("]", $data_PART[$i]); //]
-		$mydata["$data_part_split[0]"] = $data_part_split[1];
+		$data_part_split = explode("]", $data_PART[$i]); // ] (key-right split) ex: "KEY(i)"+"VAL(i)"
+		$mydata["$data_part_split[0]"] = $data_part_split[1]; // define key=value
 	}
 
 

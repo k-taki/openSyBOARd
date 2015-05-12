@@ -1,6 +1,18 @@
 @import url(http://fonts.googleapis.com/css?family=Voltaire);
 
 
+/* User details article */
+article#user {
+		float:none;
+		margin:10px auto 20px;
+		padding:10px;
+		padding-bottom:40px;
+		width:900px;
+		height:1000px;
+		border-radius:10px 10px 10px 10px;
+		}
+
+
 /* Device details article */
 article#device {
 		float:none;
@@ -8,7 +20,7 @@ article#device {
 		padding:10px;
 		padding-bottom:40px;
 		width:900px;
-		height:1000px;
+		height:1500px;
 		border-radius:10px 10px 10px 10px;
 		}
 
@@ -97,7 +109,7 @@ section.dat	{
 		background-color:transparent;
 		}
 
-div#graph	{
+div#graphview {
 		width : 600px;
 		height: 400px;
 		margin: 20px auto;
