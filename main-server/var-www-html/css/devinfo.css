@@ -20,7 +20,11 @@ article#device {
 		padding:10px;
 		padding-bottom:40px;
 		width:900px;
+<<<<<<< HEAD
 		height:1500px;
+=======
+		height:1400px;
+>>>>>>> origin/master
 		border-radius:10px 10px 10px 10px;
 		}
 
@@ -109,10 +113,21 @@ section.dat	{
 		background-color:transparent;
 		}
 
+<<<<<<< HEAD
 div#graphview {
 		width : 600px;
 		height: 400px;
 		margin: 20px auto;
+=======
+section#graph	{
+		clear:both;
+		text-align:center;
+		margin:5px auto;
+		padding:5px;
+		width:800px;
+		height:450px;
+		background-color:transparent;
+>>>>>>> origin/master
 		}
 p.graph-title	{
 		font-size:16px;
