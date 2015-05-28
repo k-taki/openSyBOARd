@@ -1,4 +1,5 @@
 <?php
+	//session_set_cookie_params(0, '/', $httponly=true);
 	session_start();
 	session_regenerate_id(TRUE);
 
@@ -7,6 +8,10 @@
 		header("Location: login.php");
 		exit;
 	}
+
+
+	// Set Cookie
+	//setcookie("");
 
 
 	// Connect MySQL
@@ -66,7 +71,7 @@
 
 
 
-	mysqli_close($dblink);
+	mysqli_close($db);
 ?>
 <!DOCTYPE html>
 <html>
@@ -87,27 +92,21 @@
 　　　∧__∧ （~)
 　　（｡･ω･｡)( )
 　　{￣￣￣￣}
-　　{~￣お_＿} ぬるいコードでごめんなさい
-　　{~￣茶_＿}
+　　{~￣お_＿} ソースコード、みちゃいましたね・・・
+　　{~￣茶_＿} まあお茶でもどうぞ
 　　{＿＿＿＿}
-　　　┗━━┛
+　　　┗━━━┛
 -->
 
 
 
-	<aside>
-		(検索ツールやリンクなど)
-	</aside>
+	<?php include '_htmlsidebar.html'; ?>
 
 
 	<article id="notice">
 		<h2>Welcome to open-SyBOARd!</h2>
-		<p>
-			ようこそ <?php echo $_SESSION['USER']; ?>さん！<br>
-			ここはメインページです。<br>
-			お知らせ等がある場合はこちらに掲載します。<br>
-			現在、登録されているデバイスは<?php echo $row_cnt; ?>台です。
-		</p>
+		<p>現在登録されている全デバイス数: <?php echo $row_cnt; ?></p>
+		<p>お知らせ:<br><?php include '_message'; ?></p>
 	</article>
 
 
@@ -129,8 +128,8 @@
 		$devq_field = mysqli_fetch_row($devicequery);
 		// Select article color
 		$articletype = "device_normal";
-		if ($devq_field[13] == 1) { $articletype = "device_user"; } //is_user=1
-		if ($devq_field[14] == 1) { $articletype = "device_hidden"; } //is_hidden=1
+		if ($devq_field[12] == 1) { $articletype = "device_user"; } //is_user=1
+		if ($devq_field[13] == 1) { $articletype = "device_hidden"; } //is_hidden=1
 		// ECHO html lang:
 		echo '<article class="' . $articletype . '">';
 		echo '<img src="./device_images/' . $devq_field[11] . '" alt="Device image">'; //device photo image

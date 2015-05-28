@@ -31,7 +31,7 @@
 <div id="container">
 
 
-	<div id="logout">
+	<div id="logout" class="loginout">
 		<h1>Syneco BOARd</h1>
 		<h2>open-sourced sensor device network for synecoculture</h2>
 		<p><br><?php echo $errorMessage; ?><br><a href="./login.php">ログイン画面に戻る.</a></p>

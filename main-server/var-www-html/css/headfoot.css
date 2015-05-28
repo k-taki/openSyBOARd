@@ -35,7 +35,7 @@ header h1 a:hover {
 /* navigation */
 header nav {
 		float:right;
-		width:500px;
+		width:760px;
 		height:64px;
 		}
 /* user name */
@@ -55,7 +55,7 @@ header ul {
 		float:right;
 		margin:0px 30px;
 		padding:0px;
-		width:300px;
+		width:90%;
 		height:24px;
 		list-style-type:none;
 		}

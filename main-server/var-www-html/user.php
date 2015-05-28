@@ -73,7 +73,7 @@
 
 
 
-	mysqli_close($dblink);
+	mysqli_close($db);
 ?>
 <!DOCTYPE html>
 <html>

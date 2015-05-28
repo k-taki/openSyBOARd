@@ -57,7 +57,7 @@
 	// Escape vars
 	$esc_DEVID = $devq_field[0];
 	// INSERT data to MySQL
-	$Q_STRING = "SELECT config FROM device WHERE device_id = '$esc_DEVID' ";
+	$Q_STRING = "SELECT fetch_string FROM device_config WHERE device_id = '$esc_DEVID' ";
 	$datquery = mysqli_query($db, $Q_STRING);
 	$qconf = mysqli_fetch_row($datquery);
 	if (!$datquery) { echo "Config read error!\r"; }

@@ -64,7 +64,7 @@
 
 
 
-	mysqli_close($dblink);
+	mysqli_close($db);
 ?>
 <!DOCTYPE html>
 <html>
@@ -77,21 +77,18 @@
 <div id="container">
 
 
-	<form id="loginForm" name="loginForm" action="<?php print($_SERVER['PHP_SELF']) ?>" method="POST">
+	<form id="loginForm" name="loginForm" action="<?php print($_SERVER['PHP_SELF']) ?>" method="POST" class="loginout">
 		<h1>Syneco BOARd (beta)</h1>
 		<h2>open-sourced sensor device network for synecoculture</h2>
 		<fieldset id="loginField">
 			<legend>LOGIN</legend>
-			<label for="userid">ユーザID</label><input type="text" id="userid" name="userid" value="<?php echo $viewUserId ?>"><br>
-			<label for="password">パスワード</label><input type="password" id="password" name="password" value=""><br>
-			<label></label><input type="submit" id="login" name="login" value="ログイン"><br>
+			<label for="userid" style="font-size:16px;">User ID </label><input type="text" id="userid" name="userid" value="<?php echo $viewUserId ?>"><br>
+			<label for="password" style="font-size:16px;">Password </label><input type="password" id="password" name="password" value=""><br>
+			<input type="checkbox" id="rememberme" name="rememberme" value="Me!"><label for="rememberme" style="font-size:12px;">Remember me</label><br>
+			<label></label><input type="submit" id="login" name="login" value="Log in"><br>
 			<p style="color:#cc3333;"><?php echo $errorMessage ?></p>
 		</fieldset>
-		<p>
-		ゲストユーザはIDに"guest", パスワードに"sy"を入力してください.<br>
-		近日中にCookie対応します.<br>
-		最新のChrome/Safariにて動作を確認しています.
-		</p>
+		<p>ゲストユーザはIDに"guest", Passwordに"sy"を入力してください.<br>最新のChrome/Safariにて動作を確認しています.</p>
 	</form>
 
 

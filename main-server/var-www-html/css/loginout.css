@@ -36,8 +36,13 @@ div#logout	{
 
 
 
+
+
+
+
+
 /* caption */
-h1		{
+.loginout h1	{
 		color:#010101;
 		font-size:40px;
 		font-family:'Voltaire',sans-serif;
@@ -45,7 +50,7 @@ h1		{
 		margin:0px auto;
 		text-align:left;
 		}
-h2		{
+.loginout h2	{
 		color:#010101;
 		font-size:16px;
 		font-family:'Voltaire',sans-serif;
@@ -53,7 +58,7 @@ h2		{
 		margin:0px auto;
 		text-align:right;
 		}
-p		{
+.loginout p	{
 		color:#010101;
 		font-size:12px;
 		font-family:sans-serif;
