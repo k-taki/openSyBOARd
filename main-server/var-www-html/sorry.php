@@ -1,4 +1,10 @@
 <?php
+	// error?
+	error_reporting(E_ERROR);
+	ini_set( 'display_errors', 1 );
+?>
+
+<?php
 	session_start();
 	session_regenerate_id(TRUE);
 

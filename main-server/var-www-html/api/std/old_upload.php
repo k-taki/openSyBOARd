@@ -33,17 +33,17 @@
 
 
 	// original data language parser
-	$data_ALLRAW = file_get_contents("php://input");
-	$data_PART = explode("[", $data_ALLRAW); // [ (key-left split) ex: "KEY1]VAL1"+"KEY2]VAL2"+...
-	$data_NUM = count($data_PART);
-	for ($i=1; $i<$data_NUM; $i++) {
-		$data_part_split = explode("]", $data_PART[$i]); // ] (key-right split) ex: "KEY(i)"+"VAL(i)"
-		$mydata["$data_part_split[0]"] = $data_part_split[1]; // define key=value
-	}
+	//$data_ALLRAW = file_get_contents("php://input");
+	//$data_PART = explode("[", $data_ALLRAW); //[
+	//$data_NUM = count($data_PART);
+	//for ($i=1; $i<$data_NUM; $i++) {
+	//	$data_part_split = explode("]", $data_PART[$i]); //]
+	//	$_POST["$data_part_split[0]"] = $data_part_split[1];
+	//}
 
 
 	// Authentication with accesskey
-	$esc_ACCESSKEY = $mydata['ACCESSKEY']; // *need escape var
+	$esc_ACCESSKEY = $_POST['ACCESSKEY']; // *need escape var
 	$query = mysqli_query($db, "SELECT * FROM device WHERE accesskey = '$esc_ACCESSKEY' ");
 	$devq_field = mysqli_fetch_row($query);
 	// If accesskey mismatch
@@ -66,26 +66,26 @@
 
 	// Check available or not Location data
 	// #1 Location unavailable flag set
-	if (!isset($mydata['LOCATION_UNAV'])) { $mydata['LOCATION_UNAV'] = "false"; } // flag NULL -> AVAILABLE
+	if (!isset($_POST['LOCATION_UNAV'])) { $_POST['LOCATION_UNAV'] = "false"; } // flag NULL -> AVAILABLE
 	// #2 Location set
-	if ($mydata['LOCATION_UNAV'] == "true") { // UNAVAILABLE
-		$mydata['LOCATION'] = "0 0";
+	if ($_POST['LOCATION_UNAV'] == "true") { // UNAVAILABLE
+		$_POST['LOCATION'] = "0 0";
 	} else { // AVAILABLE
-		if (!isset($mydata['LOCATION'])) { // If LOCATION is NULL:
+		if (!isset($_POST['LOCATION'])) { // If LOCATION is NULL:
 			if ($devq_field[6] == 1) {
-				$mydata['LOCATION'] = $posq_field[0]." ".$posq_field[1]; // If device is fixed, copy the position
+				$_POST['LOCATION'] = $posq_field[0]." ".$posq_field[1]; // If device is fixed, copy the position
 			} else {
-				$mydata['LOCATION'] = "0 0"; // not fixed but no location data from device, set pos=0,0 (default value)
+				$_POST['LOCATION'] = "0 0"; // not fixed but no location data from device, set pos=0,0 (default value)
 			}
 		}
 	}
 
 
-	// Save content, b64decode, and return the saved filename
+	// Save content, and return the saved filename
 	// Check content and available flag
-	if (!isset($mydata['MIMETYPE'])) { $mydata['MIMETYPE'] = "www/unknown"; }
-	if (!isset($mydata['CONTENT'])) { $mydata['MIMETYPE'] = ""; }
-	if (isset($mydata['CONTENT']) and $devq_field[14] == 0) {
+
+	if (!isset($_POST['MIMETYPE'])) { $_POST['MIMETYPE'] = "www/unknown"; }
+	if ((is_uploaded_file($_FILES["CONTENT"]["tmp_name"])) and $devq_field[14] == 0) {
 		// mkdir a day subfolder
 		$todaydirectory = "../../contents/".date('Y-m-d');
 		if (file_exists($todaydirectory) == FALSE) {
@@ -94,7 +94,7 @@
 		
 		
 		// get filetype
-		$esc_MTYP = $mydata['MIMETYPE'];
+		$esc_MTYP = $_POST['MIMETYPE'];
 		$mtquery = mysqli_query($db, "SELECT extension FROM system_content_type WHERE type = '$esc_MTYP' ");
 		$mtq_field = mysqli_fetch_row($mtquery);
 		// make filename
@@ -103,48 +103,51 @@
 		$userq_field = mysqli_fetch_row($userquery);
 		$contentf = date('Y-m-d')."/".$esc_DEVID."-".date('His')."-".$userq_field[0]."_".rand(100,999).".".$mtq_field[0]; // <- extension here!
 		// save file
-		$fbuf = base64_decode($mydata["CONTENT"]);
-		file_put_contents("../../contents/".$contentf, $fbuf);
-		file_put_contents("../../contents/".date('Y-m-d')."/latest-dat.txt", $data_ALLRAW); // for debug
+		if (move_uploaded_file($_FILES["CONTENT"]["tmp_name"], "../../contents/".$contentf)) {
+    		chmod("../../contents/".$contentf, 0644);
+    	}
+		//$fbuf = base64_decode($_POST["CONTENT"]);
+		//file_put_contents("../../contents/".$contentf, $fbuf);
 		
 		
 	} else {
 		$contentf = "DEVICE_DISABLE";
+		$_POST['MIMETYPE'] = "";
 		if ($devq_field[15] == 0) { $contentf = "NO_CONTENT"; }
 	}
 
 
 	// Local date-time
-	if (!isset($mydata['TIMEZONE'])) { $mydata['TIMEZONE'] = $devq_field[4]; }
-	$fixhours = (string) $mydata['TIMEZONE'];
+	if (!isset($_POST['TIMEZONE'])) { $_POST['TIMEZONE'] = $devq_field[4]; }
+	$fixhours = (string) $_POST['TIMEZONE'];
 	$fixhours = $fixhours." hour";
-	if (!isset($mydata['DATE'])) { $mydata['DATE'] = date('Y-m-d' , strtotime($fixhours)); };
-	if (!isset($mydata['TIME'])) { $mydata['TIME'] = date('H:i:s' , strtotime($fixhours)); };
+	if (!isset($_POST['DATE'])) { $_POST['DATE'] = date('Y-m-d' , strtotime($fixhours)); };
+	if (!isset($_POST['TIME'])) { $_POST['TIME'] = date('H:i:s' , strtotime($fixhours)); };
 
 
 	// Escape vars
-	$esc_DATE = $mydata['DATE']; 
-	$esc_TIME = $mydata['TIME'];
-	$esc_TZON = $mydata['TIMEZONE'];
-	$esc_LOCA = $mydata['LOCATION'];      //p.d.
-	$esc_LUNA = $mydata['LOCATION_UNAV']; //p.d.
+	$esc_DATE = $_POST['DATE']; 
+	$esc_TIME = $_POST['TIME'];
+	$esc_TZON = $_POST['TIMEZONE'];
+	$esc_LOCA = $_POST['LOCATION'];      //p.d.
+	$esc_LUNA = $_POST['LOCATION_UNAV']; //p.d.
 	if (!isset($devq_field[7])) { $devq_field[7] = 'NULL'; } //default-altitude
-	if (!isset($mydata['ALTITUDE'])) { $mydata['ALTITUDE'] = $devq_field[7]; } // if posted
-	$esc_ALTI = $mydata['ALTITUDE'];
+	if (!isset($_POST['ALTITUDE'])) { $_POST['ALTITUDE'] = $devq_field[7]; } // if posted
+	$esc_ALTI = $_POST['ALTITUDE'];
 	if (!isset($devq_field[8])) { $devq_field[8] = 'NULL'; } //default-groundheight
-	if (!isset($mydata['G_HEIGHT'])) { $mydata['G_HEIGHT'] = $devq_field[8]; } //if posted
-	$esc_GHGT = $mydata['G_HEIGHT'];
+	if (!isset($_POST['G_HEIGHT'])) { $_POST['G_HEIGHT'] = $devq_field[8]; } //if posted
+	$esc_GHGT = $_POST['G_HEIGHT'];
 	if (!isset($devq_field[9])) { $devq_field[9] = 'NULL'; } //default-place
-	if (!isset($mydata['PLACE'])) { $mydata['PLACE'] = $devq_field[9]; } //if posted
-	$esc_PLCE = $mydata['PLACE'];
+	if (!isset($_POST['PLACE'])) { $_POST['PLACE'] = $devq_field[9]; } //if posted
+	$esc_PLCE = $_POST['PLACE'];
 	$esc_CNTN = $contentf; //p.d.
-	$esc_MTYP = $mydata['MIMETYPE']; //p.d.
-	$esc_DATA = $mydata['DATA'];
-	$esc_TAG  = $mydata['TAG'];
-	$esc_TAXN = $mydata['TAXONOMY'];
-	$esc_COMM = $mydata['COMMENT'];
+	$esc_MTYP = $_POST['MIMETYPE']; //p.d.
+	$esc_DATA = $_POST['DATA'];
+	$esc_TAG  = $_POST['TAG'];
+	$esc_TAXN = $_POST['TAXONOMY'];
+	$esc_COMM = $_POST['COMMENT'];
 	$esc_HIDE = 0;
-	if ($mydata['HIDDEN'] == 'true') { $esc_HIDE = 1; }
+	if ($_POST['HIDDEN'] == 'true') { $esc_HIDE = 1; }
 	// INSERT data to MySQL
 	$Q_STRING = "INSERT INTO data VALUES ('',$esc_DEVID,'$esc_DATE','$esc_TIME',NULL,$esc_TZON,GeomFromText('POINT($esc_LOCA)'),$esc_LUNA,$esc_ALTI,$esc_GHGT,'$esc_PLCE','$esc_CNTN','$esc_MTYP','$esc_DATA','$esc_TAG','$esc_TAXN','$esc_COMM',$esc_HIDE)";
 	echo "STRING: { ".$Q_STRING." }\r";

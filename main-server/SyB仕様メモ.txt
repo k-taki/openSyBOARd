@@ -14,7 +14,7 @@
 
 ・ユーザーパスワードは単にsha256でハッシュしたものをDB内部に保存し、ログイン時に照合しているだけ。
 ・accesskeyは以下の文字列をsha1でハッシュした16進数字列:
-　accesskey = hash('sha1’, [username].[devicename].[openssl_random_pseudo_bytes(rand(2,10))] );
+　accesskey = hash('sha1', [username].[devicename].[openssl_random_pseudo_bytes(rand(2,10))] );
 ・device_imgfilenameはhash(‘md5’, [devicename]+[username]).jpg
 
 
@@ -49,10 +49,10 @@
  *- UPLOAD : 各種データをアップロードするのに使う
  *- REPORT : 動作状態などをログとしてサーバーに書き込む
  *- FETCH  : サーバー上の設定用文字列などを読み込む
-　上位ディレクトリは"original"が独自形式によるAPI、"std"がRFC準拠のHTTP-POSTによるAPIとする。
+　上位ディレクトリは"org"が独自形式によるAPI、"std"がRFC準拠のHTTP-POSTによるAPIとする。
 
 
-・センサーページでは、データ系列一覧は最新の5件のみ表示する。
+・センサーページでは、データ一覧は最新の5件のみ表示し文字列情報がある場合は50〜300件まで表示できる。
 　さらに詳しいデータが必要な場合は、「最新のn件」や「n時間〜nヶ月前」などの検索条件をかけたうえで
 　「ブラウザ上で表形式で表示」「csvダウンロード」「jsonダウンロード」「kmlダウンロード(移動体向け)」などの提供方法を用意する。
 ・グラフ表示はデータとして提供されるキーとその数値範囲、および縦軸横軸の割当を予め設定しておく

@@ -1,4 +1,10 @@
 <?php
+	// error?
+	error_reporting(E_ERROR);
+	ini_set( 'display_errors', 1 );
+?>
+
+<?php
 	//session_set_cookie_params(0, '/', $httponly=true);
 	session_start();
 	session_regenerate_id(TRUE);
@@ -105,7 +111,7 @@
 
 	<article id="notice">
 		<h2>Welcome to open-SyBOARd!</h2>
-		<p>現在登録されている全デバイス数: <?php echo $row_cnt; ?></p>
+		<p>現在利用可能なすべてのデバイス数: <?php echo $row_cnt; ?></p>
 		<p>お知らせ:<br><?php include '_message'; ?></p>
 	</article>
 

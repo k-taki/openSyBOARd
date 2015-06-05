@@ -1,4 +1,10 @@
 <?php
+	// error?
+	error_reporting(E_ERROR);
+	ini_set( 'display_errors', 1 );
+?>
+
+<?php
 	session_start();
 	$errorMessage = "";
 	$viewUserId = htmlspecialchars($_POST['userid'], ENT_QUOTES);
@@ -77,7 +83,7 @@
 <div id="container">
 
 
-	<form id="loginForm" name="loginForm" action="<?php print($_SERVER['PHP_SELF']) ?>" method="POST" class="loginout">
+	<form id="loginForm" name="loginForm" action="<?php print($_SERVER['PHP_SELF']); ?>" method="POST" class="loginout">
 		<h1>Syneco BOARd (beta)</h1>
 		<h2>open-sourced sensor device network for synecoculture</h2>
 		<fieldset id="loginField">

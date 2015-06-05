@@ -1,0 +1,70 @@
+@import url(http://fonts.googleapis.com/css?family=Voltaire);
+
+
+/* mypage config article */
+article#config	{
+		float:right;
+		margin:10px 20px 20px;
+		margin-left:10px;
+		padding:10px;
+		padding-bottom:20px;
+		width:620px;
+		height:100%;
+		background-color:rgba(255,90,140,0.5);
+		border-radius:10px 10px 10px 10px;
+		}
+/* mypage description */
+article#config h2 {
+		float:left;
+		margin:0px 20px;
+		height:45px;
+		width:550px;
+		font-size:30px;
+		font-family:'Voltaire',sans-serif;
+		text-align:left;
+		}
+article#config p {
+		float:none;
+		margin:5px auto;
+		padding:5px 10px;
+		width:540px;
+		height:100%;
+		font-size:14px;
+		font-family:sans-serif;
+		text-align:left;
+		background-color: rgba(255,255,255,0.3);
+		border-radius:10px 10px 10px 10px;
+		}
+p#alert		{
+		color:#FF0000;
+		font-size:15px;
+		}
+article#config table {
+		float:none;
+		margin:10px auto;
+		width:540px;
+		height:100%;
+		font-size:14px;
+		font-family:sans-serif;
+		}
+article#config th {
+		padding:1px 5px;
+		width:25%;
+		text-align:right;
+		background-color: rgba(255,255,255,0.3);
+		}
+article#config td {
+		padding:1px 5px;
+		width:70%;
+		text-align:left;
+		background-color: rgba(255,255,255,0.3);
+		}
+article#config span {
+		float:right;
+		margin:0px 40px 20px;
+		}
+
+
+
+
+/*EOF*/

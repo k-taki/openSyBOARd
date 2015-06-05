@@ -1,10 +1,16 @@
 <?php
+	// error?
+	error_reporting(E_ERROR);
+	ini_set( 'display_errors', 1 );
+?>
+
+<?php
 	session_start();
 	if (isset($_SESSION["USER"])) {
-		$errorMessage = "正常にログアウトされました.<br>またのご利用をお待ちしています.";
+		$errorMessage = "Logged out successfully.<br>正常にログアウトされました.";
 	}
 	else {
-		$errorMessage = "セッションが時間切れです.<br>続行するにはもう一度ログインしてください.";
+		$errorMessage = "Please Re-Login.<br>セッションが時間切れです.<br>続行するにはもう一度ログインしてください.";
 	}
 
 	// session vars clear
@@ -32,9 +38,9 @@
 
 
 	<div id="logout" class="loginout">
-		<h1>Syneco BOARd</h1>
+		<h1>Syneco BOARd (beta)</h1>
 		<h2>open-sourced sensor device network for synecoculture</h2>
-		<p><br><?php echo $errorMessage; ?><br><a href="./login.php">ログイン画面に戻る.</a></p>
+		<p><br><?php echo $errorMessage; ?><br><a href="./login.php">Back to Login / ログイン画面に戻る.</a></p>
 	</div>
 
 

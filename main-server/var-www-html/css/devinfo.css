@@ -8,7 +8,18 @@ article#device {
 		padding:10px;
 		padding-bottom:40px;
 		width:900px;
-		height:2000px;
+		height:100%;
+		border-radius:10px 10px 10px 10px;
+		}
+/* Device config article */
+article#devconf {
+		float:none;
+		margin:10px auto;
+		padding:10px;
+		padding-bottom:60px;
+		width:900px;
+		height:100%;
+		background-color:rgba(255,90,140,0.5);
 		border-radius:10px 10px 10px 10px;
 		}
 
@@ -29,7 +40,8 @@ article#device p {
 		margin:0px auto 10px;
 		padding:5px 10px;
 		width:800px;
-		height:90px;
+		height:100%;
+		min-height:90px;
 		font-size:14px;
 		font-family:sans-serif;
 		text-align:left;
@@ -43,6 +55,30 @@ article#device img {
 		width:280px;
 		height:210px;
 		box-shadow:0px 0px 10px #050505;
+		}
+
+
+/* Device config */
+article#devconf h2 {
+		float:left;
+		margin:0px 20px;
+		height:45px;
+		width:860px;
+		font-size:32px;
+		font-family:'Voltaire',sans-serif;
+		text-align:left;
+		overflow:hidden;
+		}
+article#devconf h3 {
+		float:left;
+		margin:10px 20px 0px;
+		margin-left:40px;
+		height:36px;
+		width:860px;
+		font-size:24px;
+		font-family:'Voltaire',sans-serif;
+		text-align:left;
+		overflow:hidden;
 		}
 
 
@@ -79,7 +115,7 @@ table#data th	{
 		}
 table#data td	{
 		padding:1px 5px;
-		background-color: rgba(255,255,255,0.4);
+		background-color: rgba(255,255,255,0.5);
 		width:120px;
 		}
 table#dstr	{
@@ -95,7 +131,7 @@ table#dstr th	{
 		}
 table#dstr td	{
 		padding:1px 5px;
-		background-color: rgba(255,255,255,0.4);
+		background-color: rgba(255,255,255,0.5);
 		width:120px;
 		}
 
@@ -138,6 +174,80 @@ p.graphselect	{
 		text-align:left;
 		margin:5px 10px;
 		}
+
+
+/* device config table */
+table.config	{
+		float:none;
+		margin:0px auto 10px;
+		width:700px;
+		font-size:14px;
+		font-family:sans-serif;
+		}
+table.config th {
+		padding:1px 5px;
+		width:20%;
+		text-align:right;
+		background-color: rgba(255,255,255,0.5);
+		}
+table.config td {
+		padding:1px 5px;
+		width:75%;
+		text-align:left;
+		background-color: rgba(255,255,255,0.5);
+		}
+article#devconf span.config {
+		float:right;
+		margin:0px 40px;
+		}
+
+
+/* Device isUser Web Interface */
+article#webui	{
+		float:none;
+		margin:10px auto 20px;
+		padding:10px;
+		padding-bottom:60px;
+		width:900px;
+		height:100%;
+		background-color:rgba(173,255,47,0.5);
+		box-shadow:0px 0px 5px #BFD08D,0px 0px 5px #ffffff inset;
+		border-radius:10px 10px 10px 10px;
+		}
+article#webui h2 {
+		float:left;
+		margin:0px 20px 10px;
+		height:45px;
+		width:860px;
+		font-size:32px;
+		font-family:'Voltaire',sans-serif;
+		text-align:left;
+		overflow:hidden;
+		}
+article#webui table {
+		float:none;
+		margin:0px auto 10px;
+		width:700px;
+		font-size:14px;
+		font-family:sans-serif;
+		}
+article#webui table th {
+		padding:1px 5px;
+		width:20%;
+		text-align:right;
+		background-color: rgba(255,255,255,0.5);
+		}
+article#webui table td {
+		padding:1px 5px;
+		width:75%;
+		text-align:left;
+		background-color: rgba(255,255,255,0.5);
+		}
+article#webui span {
+		float:right;
+		margin:0px 40px;
+		}
+
 
 
 /*EOF*/
